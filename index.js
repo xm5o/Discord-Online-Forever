@@ -44,13 +44,8 @@ const RICH_PRESENCE_CONFIG = {
           label: "GitHub Profile",
           url: "https://github.com/xm5o"
         }
-        // {
-        //   label: "Portfolio",
-        //   url: "https://yourportfolio.com"
-        // }
       ]
     }
-  }
 };
 
 // Bot Configuration
