@@ -18,7 +18,7 @@ const RICH_PRESENCE_CONFIG = {
       
       // Detailed Rich Presence
       details: "Using discord... i think", // First line of details
-      // state: "Developing Discord Bots", // Second line of details
+      state: "Just chilling", // Optional second line of details
       
       // Timestamps (optional)
       timestamps: {
@@ -26,17 +26,17 @@ const RICH_PRESENCE_CONFIG = {
         // end: null // Optional end time
       },
       
-      // Large Image Settings
-      // largeImage: {
-      //   key: "main_logo", // Image key from Discord Developer Portal
-      //   text: "Developer Mode" // Hover text for large image
-      // },
+      // Large Image Settings (commented out, but available)
+      largeImage: {
+        key: "default_large", // Image key from Discord Developer Portal
+        text: "My Status" // Hover text for large image
+      },
       
-      // Small Image Settings
-      // smallImage: {
-      //   key: "status_icon", // Image key from Discord Developer Portal
-      //   text: "Active Coding" // Hover text for small image
-      // },
+      // Small Image Settings (commented out, but available)
+      smallImage: {
+        key: "default_small", // Image key from Discord Developer Portal
+        text: "Online" // Hover text for small image
+      },
       
       // Buttons (max 2 buttons allowed)
       buttons: [
@@ -44,8 +44,14 @@ const RICH_PRESENCE_CONFIG = {
           label: "GitHub Profile",
           url: "https://github.com/xm5o"
         }
+        // You can add a second button if needed
+        // {
+        //   label: "Another Link",
+        //   url: "https://example.com"
+        // }
       ]
     }
+  ]
 };
 
 // Bot Configuration
@@ -84,15 +90,15 @@ function setRichPresence() {
         } : undefined,
         
         // Assets (images)
-        // assets: {
-        //   large_image: activity.largeImage ? activity.largeImage.key : undefined,
-        //   large_text: activity.largeImage ? activity.largeImage.text : undefined,
-        //   small_image: activity.smallImage ? activity.smallImage.key : undefined,
-        //   small_text: activity.smallImage ? activity.smallImage.text : undefined
-        // },
+        assets: {
+          large_image: activity.largeImage ? activity.largeImage.key : undefined,
+          large_text: activity.largeImage ? activity.largeImage.text : undefined,
+          small_image: activity.smallImage ? activity.smallImage.key : undefined,
+          small_text: activity.smallImage ? activity.smallImage.text : undefined
+        },
         
         // Buttons
-        // buttons: activity.buttons || []
+        buttons: activity.buttons || []
       }
     };
     
