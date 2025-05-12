@@ -10,15 +10,15 @@ const RICH_PRESENCE_CONFIG = {
   activities: [
     {
       // Discord Rich Presence Details
-      status: "online", // online, idle, dnd, offline
+      status: "idle", // online, idle, dnd, offline
       
       // Activity Metadata
       type: 0, // 0 = Game, 1 = Streaming, 2 = Listening, 3 = Watching
-      name: "Coding Adventures", // Main activity name
+      name: "Home", // Main activity name
       
       // Detailed Rich Presence
-      details: "Building awesome projects", // First line of details
-      state: "Developing Discord Bots", // Second line of details
+      details: "Using discord... i think", // First line of details
+      // state: "Developing Discord Bots", // Second line of details
       
       // Timestamps (optional)
       timestamps: {
@@ -27,55 +27,29 @@ const RICH_PRESENCE_CONFIG = {
       },
       
       // Large Image Settings
-      largeImage: {
-        key: "main_logo", // Image key from Discord Developer Portal
-        text: "Developer Mode" // Hover text for large image
-      },
+      // largeImage: {
+      //   key: "main_logo", // Image key from Discord Developer Portal
+      //   text: "Developer Mode" // Hover text for large image
+      // },
       
       // Small Image Settings
-      smallImage: {
-        key: "status_icon", // Image key from Discord Developer Portal
-        text: "Active Coding" // Hover text for small image
-      },
+      // smallImage: {
+      //   key: "status_icon", // Image key from Discord Developer Portal
+      //   text: "Active Coding" // Hover text for small image
+      // },
       
       // Buttons (max 2 buttons allowed)
       buttons: [
         {
           label: "GitHub Profile",
-          url: "https://github.com/yourusername"
-        },
-        {
-          label: "Portfolio",
-          url: "https://yourportfolio.com"
+          url: "https://github.com/xm5o"
         }
-      ]
-    },
-    {
-      // Second activity configuration example
-      status: "idle",
-      type: 3, // Watching
-      name: "Tutorial Videos",
-      details: "Learning New Technologies",
-      state: "Expanding Knowledge",
-      
-      largeImage: {
-        key: "learning_icon",
-        text: "Knowledge Seeker"
-      },
-      
-      smallImage: {
-        key: "study_icon",
-        text: "Studying"
-      },
-      
-      buttons: [
-        {
-          label: "Course Platform",
-          url: "https://learning.platform"
-        }
+        // {
+        //   label: "Portfolio",
+        //   url: "https://yourportfolio.com"
+        // }
       ]
     }
-  ]
 };
 
 // Bot Configuration
@@ -114,15 +88,15 @@ function setRichPresence() {
         } : undefined,
         
         // Assets (images)
-        assets: {
-          large_image: activity.largeImage ? activity.largeImage.key : undefined,
-          large_text: activity.largeImage ? activity.largeImage.text : undefined,
-          small_image: activity.smallImage ? activity.smallImage.key : undefined,
-          small_text: activity.smallImage ? activity.smallImage.text : undefined
-        },
+        // assets: {
+        //   large_image: activity.largeImage ? activity.largeImage.key : undefined,
+        //   large_text: activity.largeImage ? activity.largeImage.text : undefined,
+        //   small_image: activity.smallImage ? activity.smallImage.key : undefined,
+        //   small_text: activity.smallImage ? activity.smallImage.text : undefined
+        // },
         
         // Buttons
-        buttons: activity.buttons || []
+        // buttons: activity.buttons || []
       }
     };
     
