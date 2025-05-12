@@ -10,7 +10,7 @@ const RICH_PRESENCE_CONFIG = {
   activities: [
     {
       // Discord Rich Presence Details
-      status: "idle", // online, idle, dnd, offline
+      status: "online", // online, idle, dnd, offline
       
       // Activity Metadata
       type: 0, // 0 = Game, 1 = Streaming, 2 = Listening, 3 = Watching
@@ -18,21 +18,20 @@ const RICH_PRESENCE_CONFIG = {
       
       // Detailed Rich Presence
       details: "Using discord... i think", // First line of details
-      state: "Just chilling", // Optional second line of details
+      state: "Just chilling", // Second line of details
       
       // Timestamps (optional)
       timestamps: {
         start: Date.now(), // Show elapsed time
-        // end: null // Optional end time
       },
       
-      // Large Image Settings (commented out, but available)
+      // Large Image Settings
       largeImage: {
         key: "default_large", // Image key from Discord Developer Portal
         text: "My Status" // Hover text for large image
       },
       
-      // Small Image Settings (commented out, but available)
+      // Small Image Settings
       smallImage: {
         key: "default_small", // Image key from Discord Developer Portal
         text: "Online" // Hover text for small image
@@ -44,11 +43,6 @@ const RICH_PRESENCE_CONFIG = {
           label: "GitHub Profile",
           url: "https://github.com/xm5o"
         }
-        // You can add a second button if needed
-        // {
-        //   label: "Another Link",
-        //   url: "https://example.com"
-        // }
       ]
     }
   ]
@@ -64,7 +58,13 @@ const BOT_CONFIG = {
 };
 
 // Create bot instance with specified intents
-const bot = new Eris(BOT_CONFIG.token, { intents: BOT_CONFIG.intents });
+const bot = new Eris(BOT_CONFIG.token, { 
+  intents: BOT_CONFIG.intents,
+  // Add this to ensure proper presence capabilities
+  getAllUsers: true,
+  messageLimit: 0,
+  maxShards: 1
+});
 
 // Function to set rich presence
 function setRichPresence() {
@@ -74,36 +74,34 @@ function setRichPresence() {
   ];
   
   try {
-    // Prepare activity object for Eris
-    const presenceData = {
-      status: activity.status,
-      game: {
-        name: activity.name,
-        type: activity.type,
-        details: activity.details,
-        state: activity.state,
-        
-        // Timestamps
-        timestamps: activity.timestamps ? {
-          start: activity.timestamps.start,
-          end: activity.timestamps.end
-        } : undefined,
-        
-        // Assets (images)
-        assets: {
-          large_image: activity.largeImage ? activity.largeImage.key : undefined,
-          large_text: activity.largeImage ? activity.largeImage.text : undefined,
-          small_image: activity.smallImage ? activity.smallImage.key : undefined,
-          small_text: activity.smallImage ? activity.smallImage.text : undefined
-        },
-        
-        // Buttons
-        buttons: activity.buttons || []
-      }
+    // Construct activity object specifically for Eris
+    const activityObject = {
+      name: activity.name,
+      type: activity.type,
+      url: activity.type === 1 ? "https://www.twitch.tv/discord" : undefined
     };
-    
-    // Set the presence
-    bot.editStatus(presenceData.status, presenceData.game);
+
+    // Define additional details for rich presence
+    const richPresenceDetails = {
+      details: activity.details,
+      state: activity.state,
+      timestamps: activity.timestamps ? {
+        start: activity.timestamps.start
+      } : undefined,
+      assets: {
+        large_image: activity.largeImage ? activity.largeImage.key : undefined,
+        large_text: activity.largeImage ? activity.largeImage.text : undefined,
+        small_image: activity.smallImage ? activity.smallImage.key : undefined,
+        small_text: activity.smallImage ? activity.smallImage.text : undefined
+      },
+      buttons: activity.buttons || []
+    };
+
+    // Merge additional details into activity object
+    Object.assign(activityObject, richPresenceDetails);
+
+    // Set the presence with detailed information
+    bot.editStatus(activity.status, activityObject);
     
     console.log(`Updated Rich Presence: ${activity.name}`);
   } catch (error) {
@@ -116,11 +114,21 @@ bot.on("error", (err) => {
   console.error("Bot encountered an error:", err);
 });
 
+// Warn about potential issues
+bot.on("warn", (message) => {
+  console.warn("Bot warning:", message);
+});
+
+// Debug logging
+bot.on("debug", (message) => {
+  console.log("Bot debug:", message);
+});
+
 // Ready event
 bot.on("ready", () => {
   console.log(`Bot is ready! Logged in as ${bot.user.username}`);
   
-  // Set initial rich presence
+  // Ensure presence is set immediately
   setRichPresence();
   
   // Change rich presence periodically
