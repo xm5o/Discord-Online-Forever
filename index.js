@@ -50,6 +50,7 @@ const RICH_PRESENCE_CONFIG = {
         // }
       ]
     }
+  }
 };
 
 // Bot Configuration
