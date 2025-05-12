@@ -1,32 +1,138 @@
 const Eris = require("eris");
 const keep_alive = require('./keep_alive.js');
 
-// Configuration object for easy customization
-const CONFIG = {
-  // Bot token (preferably set as an environment variable)
-  TOKEN: process.env.token,
+// Comprehensive Rich Presence Configuration
+const RICH_PRESENCE_CONFIG = {
+  // Global settings
+  interval: 30000, // Change interval in milliseconds
   
-  // Custom game activities
-  ACTIVITIES: [
-    { name: "with code", type: 0 },
-    { name: "Discord Bot", type: 0 },
-    { name: "Coding Adventures", type: 0 }
-  ],
-  
-  // Activity change interval (in milliseconds)
-  ACTIVITY_CHANGE_INTERVAL: 60000, // 1 minute
-  
-  // Command prefix
-  PREFIX: '!'
+  // Array of rich presence configurations
+  activities: [
+    {
+      // Discord Rich Presence Details
+      status: "online", // online, idle, dnd, offline
+      
+      // Activity Metadata
+      type: 0, // 0 = Game, 1 = Streaming, 2 = Listening, 3 = Watching
+      name: "Coding Adventures", // Main activity name
+      
+      // Detailed Rich Presence
+      details: "Building awesome projects", // First line of details
+      state: "Developing Discord Bots", // Second line of details
+      
+      // Timestamps (optional)
+      timestamps: {
+        start: Date.now(), // Show elapsed time
+        // end: null // Optional end time
+      },
+      
+      // Large Image Settings
+      largeImage: {
+        key: "main_logo", // Image key from Discord Developer Portal
+        text: "Developer Mode" // Hover text for large image
+      },
+      
+      // Small Image Settings
+      smallImage: {
+        key: "status_icon", // Image key from Discord Developer Portal
+        text: "Active Coding" // Hover text for small image
+      },
+      
+      // Buttons (max 2 buttons allowed)
+      buttons: [
+        {
+          label: "GitHub Profile",
+          url: "https://github.com/yourusername"
+        },
+        {
+          label: "Portfolio",
+          url: "https://yourportfolio.com"
+        }
+      ]
+    },
+    {
+      // Second activity configuration example
+      status: "idle",
+      type: 3, // Watching
+      name: "Tutorial Videos",
+      details: "Learning New Technologies",
+      state: "Expanding Knowledge",
+      
+      largeImage: {
+        key: "learning_icon",
+        text: "Knowledge Seeker"
+      },
+      
+      smallImage: {
+        key: "study_icon",
+        text: "Studying"
+      },
+      
+      buttons: [
+        {
+          label: "Course Platform",
+          url: "https://learning.platform"
+        }
+      ]
+    }
+  ]
 };
 
-// Create the bot instance
-const bot = new Eris(CONFIG.TOKEN);
+// Bot Configuration
+const BOT_CONFIG = {
+  token: process.env.token,
+  intents: [
+    "guilds",
+    "guildMessages"
+  ]
+};
 
-// Function to set a random game activity
-function setRandomActivity() {
-  const activity = CONFIG.ACTIVITIES[Math.floor(Math.random() * CONFIG.ACTIVITIES.length)];
-  bot.editStatus("online", activity);
+// Create bot instance with specified intents
+const bot = new Eris(BOT_CONFIG.token, { intents: BOT_CONFIG.intents });
+
+// Function to set rich presence
+function setRichPresence() {
+  // Select a random activity configuration
+  const activity = RICH_PRESENCE_CONFIG.activities[
+    Math.floor(Math.random() * RICH_PRESENCE_CONFIG.activities.length)
+  ];
+  
+  try {
+    // Prepare activity object for Eris
+    const presenceData = {
+      status: activity.status,
+      game: {
+        name: activity.name,
+        type: activity.type,
+        details: activity.details,
+        state: activity.state,
+        
+        // Timestamps
+        timestamps: activity.timestamps ? {
+          start: activity.timestamps.start,
+          end: activity.timestamps.end
+        } : undefined,
+        
+        // Assets (images)
+        assets: {
+          large_image: activity.largeImage ? activity.largeImage.key : undefined,
+          large_text: activity.largeImage ? activity.largeImage.text : undefined,
+          small_image: activity.smallImage ? activity.smallImage.key : undefined,
+          small_text: activity.smallImage ? activity.smallImage.text : undefined
+        },
+        
+        // Buttons
+        buttons: activity.buttons || []
+      }
+    };
+    
+    // Set the presence
+    bot.editStatus(presenceData.status, presenceData.game);
+    
+    console.log(`Updated Rich Presence: ${activity.name}`);
+  } catch (error) {
+    console.error("Error setting rich presence:", error);
+  }
 }
 
 // Error handling
@@ -38,117 +144,18 @@ bot.on("error", (err) => {
 bot.on("ready", () => {
   console.log(`Bot is ready! Logged in as ${bot.user.username}`);
   
-  // Set initial activity
-  setRandomActivity();
+  // Set initial rich presence
+  setRichPresence();
   
-  // Change activity periodically
-  setInterval(setRandomActivity, CONFIG.ACTIVITY_CHANGE_INTERVAL);
-});
-
-// Command to add a new activity
-bot.on("messageCreate", async (msg) => {
-  // Ignore messages from bots and messages without prefix
-  if (msg.author.bot || !msg.content.startsWith(CONFIG.PREFIX)) return;
-  
-  const args = msg.content.slice(CONFIG.PREFIX.length).trim().split(/ +/);
-  const command = args.shift().toLowerCase();
-  
-  // Add activity command
-  if (command === "addactivity") {
-    const activityName = args.join(" ");
-    if (!activityName) {
-      return msg.channel.createMessage("Please provide an activity name!");
-    }
-    
-    CONFIG.ACTIVITIES.push({ name: activityName, type: 0 });
-    msg.channel.createMessage(`Added new activity: "${activityName}"`);
-  }
-  
-  // List activities command
-  if (command === "listactivities") {
-    const activitiesList = CONFIG.ACTIVITIES.map((activity, index) => 
-      `${index + 1}. ${activity.name}`
-    ).join("\n");
-    msg.channel.createMessage(`Current Activities:\n${activitiesList}`);
-  }
-  
-  // Remove activity command
-  if (command === "removeactivity") {
-    const index = parseInt(args[0]) - 1;
-    if (isNaN(index) || index < 0 || index >= CONFIG.ACTIVITIES.length) {
-      return msg.channel.createMessage("Invalid activity index!");
-    }
-    
-    const removedActivity = CONFIG.ACTIVITIES.splice(index, 1)[0];
-    msg.channel.createMessage(`Removed activity: "${removedActivity.name}"`);
-  }
-});
-
-// Interactive buttons for activity management
-bot.on("interactionCreate", async (interaction) => {
-  if (!interaction.type === Eris.Constants.InteractionTypes.MESSAGE_COMPONENT) return;
-  
-  // Activity management buttons
-  if (interaction.data.custom_id === "add_activity") {
-    await interaction.createModal({
-      title: "Add New Activity",
-      custom_id: "add_activity_modal",
-      components: [
-        {
-          type: 1,
-          components: [
-            {
-              type: 4,
-              custom_id: "activity_name",
-              label: "Activity Name",
-              style: 1,
-              type: "text_input",
-              required: true
-            }
-          ]
-        }
-      ]
-    });
-  }
-});
-
-// Modal submit handler
-bot.on("interactionCreate", async (interaction) => {
-  if (!interaction.type === Eris.Constants.InteractionTypes.MODAL_SUBMIT) return;
-  
-  if (interaction.data.custom_id === "add_activity_modal") {
-    const activityName = interaction.data.components[0].components[0].value;
-    
-    CONFIG.ACTIVITIES.push({ name: activityName, type: 0 });
-    
-    await interaction.createMessage({
-      content: `Added new activity: "${activityName}"`,
-      flags: 64 // Ephemeral message
-    });
-  }
-});
-
-// Command to send activity management buttons
-bot.on("messageCreate", async (msg) => {
-  if (msg.content.startsWith(`${CONFIG.PREFIX}activitymanager`)) {
-    const buttons = {
-      type: 1,
-      components: [
-        {
-          type: 2,
-          label: "Add Activity",
-          style: 1,
-          custom_id: "add_activity"
-        }
-      ]
-    };
-    
-    msg.channel.createMessage({
-      content: "Manage Bot Activities",
-      components: [buttons]
-    });
-  }
+  // Change rich presence periodically
+  setInterval(setRichPresence, RICH_PRESENCE_CONFIG.interval);
 });
 
 // Connect the bot
 bot.connect();
+
+// Export configurations for potential external modification
+module.exports = {
+  RICH_PRESENCE_CONFIG,
+  BOT_CONFIG
+};
